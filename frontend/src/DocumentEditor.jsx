@@ -530,7 +530,7 @@ const DocumentEditor = () => {
             <div className="flex flex-col w-[100%] md:w-full sm:w-2/3 items-center p-6 ">
                 {/*Editor Panel Code */}
                 {/* {styles} */}
-                {selectedLanguage === "plaintext" ? (
+                {(selectedLanguage === "plaintext" || selectedLanguage === "json" ) ? (
 
 
                     <TextEditor

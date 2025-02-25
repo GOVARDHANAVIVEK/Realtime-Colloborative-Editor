@@ -64,7 +64,7 @@ const TextEditor = (
                     language={selectedLanguage}
                     value={content}
                     onChange={handleEditorChange}
-
+                    theme='vs-dark'
                     className="border border-gray-300 rounded-md "
                 />
 

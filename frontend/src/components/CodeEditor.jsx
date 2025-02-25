@@ -1,5 +1,8 @@
-import React from 'react'
+import {useState} from 'react'
 import { Editor } from '@monaco-editor/react';
+
+import { executeCodeFromAPI } from './codeExecutor';
+
 const CodeEditor =(
     {
         enableRestore,
@@ -12,6 +15,16 @@ const CodeEditor =(
         runCode,
         closeExecuter
     }) => {
+
+        const [output, setOutput] = useState("");
+        const [loading, setLoading] = useState(false);
+
+        const runProgramCode = async () => {
+            setLoading(true)
+         const output_ = await executeCodeFromAPI(selectedLanguage,content.toString())
+           setOutput(output_)
+           setLoading(false)
+        };
   return (
     <div className='w-full'>
         <div className="w-full  bg-white shadow-lg rounded-lg p-6 border border-gray-300">
@@ -52,7 +65,9 @@ const CodeEditor =(
                             <div className='w-[40%] flex gap-4 items-center px-1 py-1 justify-end'>
                                
                                 <button 
-                                    onClick={executeCode}
+                                    onClick={()=>{
+                                        executeCode()
+                                    runProgramCode()} }
                                     className='px-5 py-2 bg-gray-500 text-white font-semibold rounded-3xl hover:bg-gray-700'
                                 >
                                     Run Code
@@ -88,9 +103,12 @@ const CodeEditor =(
                                 onChange={handleEditorChange}
                                 className="border border-gray-300 rounded-md "/>
                             
-                            <section className='w-[30%] h=[500px] bg-black px-4 py-2'>
-                                    <p className='text-white text-lg'><span className='text-white text-lg'>Output:</span> defefefe</p>
-                            </section> 
+                            <section className='w-[30%] h-[500px] bg-black px-4 py-2'>
+                                <p className='text-white text-lg'>
+                                    <span className='text-white text-lg'>Output: </span>  
+                                    {loading ? <span className="text-yellow-400"> executing...</span> : output}
+                                </p>
+                            </section>
                         </>
                         ):
                         
