@@ -1,0 +1,568 @@
+import React, { useEffect, useState, useRef ,useCallback} from 'react';
+
+import socket from './socket';
+import { useParams, useNavigate } from 'react-router-dom';
+import getUserIdFromToken from './getUserId';
+import Versions from './components/versions';
+import ActiveUsers from './components/ActiveUsers';
+import TextEditor from './components/TextEditor';
+import CodeEditor from './components/CodeEditor';
+import { useNotification } from './NotificationProvider'
+
+// import TrackCursor from './components/TrackCursor';
+const DocumentEditor = () => {
+
+    const userId = getUserIdFromToken()
+    console.log("userid", userId)
+  
+    // const {mountEditor} = TrackCursor()
+    const { documentId } = useParams();
+    console.log('Document ID:', documentId);
+    const [content, setContent] = useState('');
+    const [OriginalContent, setOriginalContent] = useState("");
+    const navigate = useNavigate();
+    const [selectedLanguage, setSelectedLanguage] = useState("javascript"); // Default language
+    const [typingUser, setTypingUser] = useState('');
+    const typingTimeoutRef = useRef(null); // To clear timeout
+    const [docTitle, setDocTitle] = useState('')
+    const userCache = useRef(new Map());
+    const [activeUsers, setActiveUsers] = useState([])
+    const [IsEditingTitle, setIsEditingTitle] = useState(false);
+    const [lastSaved, setLastSaved] = useState(null);
+    const [enableRestore, setEnableRestore] = useState(false)
+    const [versionedDocuments, setVersionedDocuments] = useState([])
+    const [selectedVersion, setSelectedVersion] = useState(null);
+    const [restoreContent, setRestoreContent] = useState("")
+    const [selectedVersionIndex, setSelectedVersionIndex] = useState(null)
+    const [showBackBtn, setShowBackBtn] = useState(null)
+    const [showUsers, setShowUsers] = useState(false);
+    const [showVersions, setShowVersions] = useState(false);
+    const { showNotification } = useNotification();
+    const [runCode, setRunCode] = useState(false)
+  
+
+    const [checkedDocs, setCheckedDocs] = useState(() => {
+        const savedState = localStorage.getItem("checkedDocs");
+        return savedState ? JSON.parse(savedState) : {};
+    });
+
+    useEffect(() => {
+        console.log("checkeddocs", checkedDocs)
+        console.log("showVersions", showVersions)
+    }, [checkedDocs]);
+    const isTokenExpired = (token) => {
+        try {
+            const decoded = JSON.parse(atob(token.split(".")[1]));
+            return decoded.exp * 1000 < Date.now();
+        } catch (error) {
+            return true;
+        }
+    };
+
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token || isTokenExpired(token)) {
+            localStorage.removeItem("accessToken");
+            alert('Session expired.');
+            navigate("/signin");
+        }
+    }, [navigate]);
+
+
+
+    // Function to detect language based on content
+    const detectLanguage = (text) => {
+        if (!text || typeof text !== "string") return "plaintext"; // Handle empty input
+
+        // JSON: Must start with `{}` or `[]` and follow JSON-like structure
+        if (/^\s*\{[\s\n]*("|')?\w+\1?:/.test(text) || /^\s*\[.*\]\s*$/.test(text)) return "json";
+
+        // Python: Functions, imports, class definitions, or Pythonic syntax
+        if (
+            /^\s*def\s+\w+\(/.test(text) ||               // Function definition
+            /^\s*import\s+\w+/.test(text) ||              // Import statement
+            /^\s*class\s+\w+\s*\(/.test(text) ||          // Class definition
+            /^\s*print\(["']/.test(text) ||               // print() function
+            /\bself\b/.test(text) ||                      // `self` keyword (OOP)
+            /\b(lambda|yield|async|await|try|except)\b/.test(text)  // Python keywords
+        ) return "python";
+
+        // JavaScript: ES6 imports, variable declarations, function definitions
+        if (
+            /^\s*import .* from ['"].*['"];?/.test(text) ||  // ES6 import
+            /^\s*(const|let|var) .*=\s*.*=>/m.test(text) ||  // Arrow function
+            /\bfunction\s+\w+\(/.test(text) ||              // Function declaration
+            /\b(console\.log|document\.querySelector)\b/.test(text) || // Common JS functions
+            /\bclass\s+\w+\s*\{/.test(text)                // Class definition
+        ) return "javascript";
+
+        // HTML: Detects <html>, <head>, <body>, and common HTML tags
+        if (/<\/?(html|head|body|div|span|p|a|img|h[1-6]|script|style|meta|title)\b[^>]*>/i.test(text)) return "html";
+
+        // CSS: Looks for CSS rules with selectors and properties
+        if (/\b[a-zA-Z0-9\-_]+\s*\{\s*[^{}]+\s*\}/.test(text) || /\b(color|background|font|border|padding|margin):\s*[^;]+;/.test(text)) return "css";
+
+        // SQL: Detects common SQL keywords and syntax
+        if (/\b(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|JOIN|ORDER BY|GROUP BY|HAVING|LIMIT)\b/i.test(text)) return "sql";
+
+        // Shell Script (Bash): Detects `#!/bin/bash` or common shell commands
+        if (/^#!\s*\/bin\/bash/.test(text) || /\b(echo|cd|ls|pwd|grep|awk|sed|chmod|sudo)\b/.test(text)) return "shell";
+
+        // Default: Plain Text (fallback)
+        return "plaintext";
+    };
+
+
+
+    const fetchUsername = async (userId) => {
+        if (userCache && userCache.current.has(userId)) return userCache.current.get(userId);
+        try {
+            const response = await fetch(`http://localhost:3900/api/users/user/${userId}`);
+            const data = await response.json();
+            if (data?.result?.username) {
+                userCache.current.set(userId, data.result.username);
+                return data.result.username;
+            }
+        } catch (error) {
+            console.error('Error fetching username:', error);
+        }
+        return userId;
+    };
+
+    useEffect(() => {
+        if (!documentId) return;
+        const loadData = async () => {
+            try {
+                const response = await fetch(`http://localhost:3900/api/documents/document/${documentId}`);
+                const data = await response.json();
+                console.log("content", content, "original", OriginalContent)
+                setContent(data?.result?.content || '');
+                setDocTitle(data?.result?.title || '');
+                setOriginalContent(data?.result?.content)
+
+            } catch (error) {
+                console.error('Error fetching document data:', error);
+            }
+        };
+        loadData();
+    }, [documentId]); // ✅ Runs only when documentId changes
+
+    useEffect(() => {
+        console.log("setOriginalContent", OriginalContent)
+    }, [OriginalContent])
+    // Handle socket events (join room & receive updates)
+    useEffect(() => {
+        if (!documentId || !socket) return;
+
+        socket.emit('joinDocument', { documentId, userId });
+
+        socket.on("activeUsers", async (users) => {
+            console.log("Received users:", users);
+
+            const userArray = Array.isArray(users) ? users : Object.values(users); // Ensure it's an array
+
+            try {
+                const userNames = await Promise.all(userArray.map(fetchUsername));
+                setActiveUsers(userNames);
+            } catch (error) {
+                console.error("Error fetching usernames:", error);
+            }
+        });
+
+
+        socket.on('load-document', (data) => setContent(data));
+
+        socket.on('receive-changes', (newContent) => setContent(newContent));
+
+        return () => {
+            socket.off('load-document');
+            socket.off('receive-changes');
+            socket.emit("leaveDocument", { documentId, userId });
+            socket.off("activeUsers");
+        };
+    }, [documentId, userId]);
+    // Detect language whenever content updates
+    useEffect(() => {
+        setSelectedLanguage(detectLanguage(content));
+    }, [content]);
+
+    
+    
+    const handleTyping = async ({ userId}) => {
+        console.log("Received user typing event:", { userId});
+        setTypingUser(await fetchUsername(userId));
+    
+        
+        
+    };
+    
+    
+    
+    useEffect(() => {
+        if (!documentId || !socket) return;
+    
+        socket.on('user-typing', handleTyping);
+       
+        socket.on('user-stopped-typing',(()=>{
+            setTypingUser('')
+        }));
+        
+        
+        
+        return () => {
+            socket.off('user-typing', handleTyping);
+            socket.off('user-stopped-typing');
+        };
+    }, [documentId,socket]); // Include handleTyping in dependencies
+    
+
+  
+    
+
+   
+   
+    // Ensure editorRef stays intact across re-renders
+   
+    
+    const handleEditorChange = (value) => {
+        setContent(value);
+        socket.emit('send-changes', { documentId, content: value });
+    
+        socket.emit('user-typing', { documentId, userId});
+    
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    
+        typingTimeoutRef.current = setTimeout(() => {
+            socket.emit('user-stopped-typing', { documentId });
+                      
+        }, 500);
+    };
+    
+
+
+    const saveDocument = () => {
+        const savedTime = new Date().toLocaleString();
+        setLastSaved(savedTime);
+        if (docTitle !== "Untitled Document") {
+            socket.emit('save-document', { documentId, content });
+            setOriginalContent(content)
+            showNotification(`Saving.........`, "success")
+            setTimeout(() => {
+                showNotification(`Saved.`, "success")
+            }, 1500)
+        } else {
+            showNotification('Set a document name to enable saving.', "failure")
+        }
+
+    };
+
+    useEffect(() => {
+
+        if (lastSaved && checkedDocs[documentId]) {
+            socket.emit('save-version', { docTitle, documentId, content, lastSaved, userId });
+        }
+    }, [lastSaved, checkedDocs[documentId]]);
+
+    useEffect(() => {
+        const fetchVersions = async () => {
+            try {
+                const response = await fetch(`http://localhost:3900/api/documents/versions/${documentId}`);
+                const data = await response.json();
+                console.log(data)
+                if (data?.result) {
+                    const updatedDocs = await Promise.all(
+                        data?.result.map(async (doc) => ({
+                            ...doc,
+                            savedBy: await fetchUsername(doc.savedBy),
+                        }))
+                    );
+                    setVersionedDocuments(updatedDocs);
+                }
+            } catch (error) {
+                console.error("Error fetching document versions:", error);
+            }
+        };
+
+        fetchVersions();
+        socket.on("version-saved", fetchVersions);
+
+        return () => {
+            socket.off("version-saved", fetchVersions);
+        };
+    }, [documentId]); // ✅ Empty dependency array to avoid reattaching event listener
+
+    useEffect(() => {
+        console.log("Updated versionedDocuments:", versionedDocuments);
+    }, [versionedDocuments]);
+
+    const closeDocument = () => {
+        socket.emit('close-document');
+        navigate('/home');
+    };
+
+    const handleKeyDown = async (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            setIsEditingTitle(false);
+            try {
+                const token = localStorage.getItem("accessToken");
+                const response = await fetch(`http://localhost:3900/api/documents/update-title/${documentId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ title: docTitle }),
+                });
+                if (!response.ok) throw new Error("Failed to update title");
+
+                const data = await response.json();
+                // if (data?.result?.title) {
+                //     setDocTitle(data.result.title); // Ensure state updates with new title
+                // }
+                showNotification(`title Saved.`, "success")
+            } catch (error) {
+                console.error("Error updating title:", error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        const fetchTitle = async () => {
+            try {
+                const token = localStorage.getItem("accessToken");
+                const response = await fetch(`http://localhost:3900/api/documents/document/${documentId}`, {
+                    method: "GET",
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                if (!response.ok) throw new Error("Failed to fetch title");
+
+                const data = await response.json();
+                setDocTitle(data?.result?.title || "");
+
+            } catch (error) {
+                console.error("Error fetching title:", error);
+            }
+        };
+
+        fetchTitle();
+    }, [documentId]);
+
+
+    const getVersionIndex = async (version) => {
+        console.log("✅ handleViewVersion called with index:", version);
+        setSelectedVersion(version)
+        setEnableRestore(true)
+        // setSelectedVersionIndex(version)
+        setShowBackBtn(true)
+    };
+
+    const removeVersionIndex = async () => {
+        setSelectedVersion(null)
+        setEnableRestore(false)
+        setShowBackBtn(false)
+    }
+
+    const fetchContent = async () => {
+        try {
+            const resposne = await fetch(`http://localhost:3900/api/documents/versions/${documentId}/${selectedVersion}`);
+            const data = await resposne.json()
+            console.log("data", data, "version", selectedVersion)
+            setContent(data?.result?.content)
+            return data
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    useEffect(() => {
+        console.log("selectedVersion", selectedVersion)
+
+        if (selectedVersion !== null && selectedVersion !== undefined) {
+            setContent('')
+            fetchContent()
+
+        } else {
+            console.log("came here.....")
+            setContent(OriginalContent)
+        }
+
+    }, [selectedVersion])
+
+    const restoreOriginalContent = () => {
+        console.log("content", content, "OriginalContent", OriginalContent)
+        setContent(OriginalContent)
+        console.log("content", content)
+    }
+    const restoreSelectedVersionContent = () => {
+        if (selectedVersion !== null && selectedVersion !== undefined) {
+            const data = fetchContent()
+            console.log(data)
+            setContent(data?.result?.content)
+            // setOriginalContent(data?.result?.content)
+            socket.emit('save-document', { documentId, content })
+            socket.emit('remove-version', { documentId, selectedVersion })
+            console.log("content", content, "original", OriginalContent)
+        } else {
+            // setContent(OriginalContent)
+            setContent('')
+        }
+    }
+
+    const displayUsers = () => {
+        setShowUsers(prev => !prev)
+    }
+
+
+    const displayVersions = () => {
+        setShowVersions(prev => !prev)
+    }
+
+
+    const executeCode = () => {
+        setRunCode(true)
+    }
+
+    const closeExecuter = () => {
+        setRunCode(false)
+    }
+
+    
+
+    return (
+
+        <div className="flex flex-col md:flex-col sm:flex-col w-full h-screen  bg-gray-50 w-[100%] ">
+
+            {/*Users n version history*/}
+            <div className='flex flex-row md:flex-row sm:flex-col w-full h-max py-4 px-2 justify-between items-center '>
+                <div className="w-max bg-gray-900 text-black rounded-lg  text-center items-center">
+                    <input
+                        type="text"
+                        value={docTitle}
+                        // onClick={()=>setIsEditingTitle(true)}
+                        onKeyDown={handleKeyDown}
+
+                        onChange={(e) => setDocTitle(e.target.value)}
+                        // onBlur={() => setIsEditable(false)}
+                        className="text-center items-center font-semibold w-max"
+                        placeholder="Enter Document Title..."
+                    // disabled={!IsEditingTitle}
+                    />
+                </div>
+                <div>
+                    {typingUser && (
+                        <p className="text-lg text-center text-violet-800">{typingUser} is typing...</p>
+                    )}
+                </div>
+                <div className='flex flex-row justify-between gap-4'>
+                    <div className="relative">
+                        <button
+                            className='relative bg-[#007BFF] px-2 py-2 w-24 rounded-3xl text-white hover:bg-blue-600'
+                            onClick={displayUsers}
+                        >
+                            Users
+                        </button>
+
+                        {showUsers && (
+                            <div className="absolute top-full right-0 mt-2 w-[300px] flex items-center justify-end bg-transparent bg-opacity-50 z-50">
+                                <div className="relative w-full h-[60vh] bg-gray-800 p-6 shadow-2xl rounded-xl">
+
+
+                                    {/* Title */}
+                                    <h3 className="text-lg font-semibold text-center text-white mb-4">Active Users</h3>
+
+                                    {/* Active Users List */}
+                                    <div className="overflow-y-auto h-[80%] px-4">
+                                        <ActiveUsers activeUsers={activeUsers} />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className='relative'>
+                        <div>
+                            {checkedDocs[documentId] && (
+                                <button
+                                    className=' relative bg-[#5CB85C] px-2 py-2 w-24 rounded-3xl text-white hover:bg-green-600'
+                                    onClick={() => { displayVersions() }}
+                                >verisons</button>
+                            )}
+
+                        </div>
+                        {(showVersions && checkedDocs[documentId]) && (
+                            <div className="absolute top-full right-0 mt-2 w-[400px] flex items-center justify-end bg-transparent bg-opacity-50 z-50">
+                                <div className="relative w-full h-[90vh] bg-gray-800 p-6 shadow-2xl rounded-xl">
+
+
+                                    {/* Title */}
+                                    <h3 className="text-lg font-semibold text-center text-white mb-4">Versions history</h3>
+
+                                    {/* Active Users List */}
+                                    <div className="overflow-y-auto h-[90%] px-4">
+                                        <Versions
+                                            versionedDocuments={versionedDocuments}
+                                            getVersionIndex={getVersionIndex}
+                                            selectedVersionIndex={selectedVersionIndex}
+                                            setSelectedVersionIndex={setSelectedVersionIndex}
+                                            restoreOriginalContent={restoreOriginalContent}
+                                            setShowBackBtn={setShowBackBtn}
+                                            showBackBtn={showBackBtn}
+                                            removeVersionIndex={removeVersionIndex}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        )}
+                    </div>
+                    <div>
+                        <button
+                            onClick={closeDocument}
+                            className="px-7 py-2 bg-red-500 text-white rounded-3xl shadow-md hover:bg-red-600 transition-all"
+                        >
+                            Close
+                        </button>
+                    </div>
+
+
+
+                </div>
+            </div>
+            <div className="flex flex-col w-[100%] md:w-full sm:w-2/3 items-center p-6 ">
+                {/*Editor Panel Code */}
+                {/* {styles} */}
+                {selectedLanguage === "plaintext" ? (
+
+
+                    <TextEditor
+                        selectedLanguage={selectedLanguage}
+                        restoreSelectedVersionContent={restoreSelectedVersionContent}
+                        enableRestore={enableRestore}
+                        saveDocument={saveDocument}
+                        content={content}
+                        handleEditorChange={handleEditorChange}
+                        
+
+                    />
+                ) :
+                    <CodeEditor
+                        selectedLanguage={selectedLanguage}
+                        restoreSelectedVersionContent={restoreSelectedVersionContent}
+                        enableRestore={enableRestore}
+                        saveDocument={saveDocument}
+                        content={content}
+                        runCode={runCode}
+                        executeCode={executeCode}
+                        closeExecuter={closeExecuter}
+                        handleEditorChange={handleEditorChange}
+                       
+                    />
+
+                }
+
+            </div>
+        </div>
+
+    );
+};
+
+export default DocumentEditor;

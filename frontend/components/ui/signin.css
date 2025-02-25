@@ -1,0 +1,141 @@
+
+.signin-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 500px;
+  width: 500px;
+  box-shadow: 0px 0px 20px rgb(195, 238, 243);
+  background-color: #000000;
+  border-radius: 40px;
+}
+
+h1 {
+  font-size: 2rem;
+  color: #0c9ef2;
+  margin-bottom: 20px;
+}
+
+.signin-form-container {
+  background: #000000;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  color: white;
+}
+
+.form-login {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-login div {
+  margin-bottom: 15px;
+}
+
+label {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 5px;
+  display: block;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  transition: 0.3s ease-in-out;
+}
+
+input:focus {
+  border-color: #007bff;
+}
+
+.submit-btn {
+  background: #007bff;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+}
+
+.submit-btn:hover {
+  background: #0056b3;
+}
+
+.other-login {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+}
+
+.other-login .link {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.other-login .link:hover {
+  text-decoration: underline;
+}
+
+.OAuth-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.google,
+.github {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.5rem;
+  transition: 0.3s ease-in-out;
+}
+
+/* .google:hover {
+  background: #f1f1f1;
+}
+
+.github:hover {
+  background: #f1f1f1;
+} */
+
+/* Responsive Styles */
+@media (max-width: 500px) {
+  .signin-form-container {
+      width: 90%;
+      padding: 1.5rem;
+  }
+
+  h1 {
+      font-size: 1.8rem;
+  }
+
+  .submit-btn {
+      padding: 10px;
+  }
+
+  .OAuth-container {
+      gap: 5px;
+  }
+
+  .google,
+  .github {
+      font-size: 1.3rem;
+      padding: 8px;
+  }
+}

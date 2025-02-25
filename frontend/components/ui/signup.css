@@ -1,0 +1,158 @@
+/*  */
+
+.signup-container {
+  height: fit-content;
+  width: 500px;
+  justify-content: center;
+  align-items: center;
+  /* max-width: 400px; */
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.9);
+  border-radius: 40px;
+  box-shadow: 0px 0px 40px rgb(183, 180, 189);
+  text-align: center;
+
+}
+
+h1 {
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.form-container {
+  margin-bottom: 20px;
+}
+
+.form-signup {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-left: 40px;
+  width: 80%;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  background: rgba(164, 113, 2, 0.1);
+  color: white;
+  box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+}
+
+input:focus {
+  box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.5);
+}
+
+label {
+  text-align: left;
+  display: block;
+  font-size: 14px;
+  color: #bbb;
+}
+
+.submit-btn {
+  padding: 10px;
+  background-color: white;
+  color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.5);
+}
+
+.submit-btn:hover {
+  background-color: #ccc;
+}
+
+.other-login p {
+  margin-bottom: 10px;
+}
+
+.link {
+  color: cyan;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.OAuth-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+ button.github {
+  padding: 10px;
+  background: grey;
+  /* border: 1px solid white; */
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 20px;
+}
+button.google{
+  padding: 10px;
+  background: rgb(245, 2, 2);
+  /* border: 1px solid white; */
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 20px;
+}
+/* button.google:hover, button.github:hover {
+  box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.7);
+} */
+
+.icon {
+  font-size: 24px;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .container {
+    width: 95%;
+    padding: 15px;
+  }
+  .gender-options {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* Gender Container */
+.gender-container {
+  margin-top: 15px;
+  text-align: left;
+}
+
+.gender-options {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 15px;
+  align-items: center;
+}
+
+.gender-options label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  color: #bbb;
+  cursor: pointer;
+}
+
+.gender-options input[type="radio"] {
+  accent-color: cyan; /* Custom radio button color */
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+
