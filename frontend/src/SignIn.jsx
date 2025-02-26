@@ -131,10 +131,10 @@ const SignIn = () => {
                 </div>
 
                 <div className="flex justify-center gap-4 mt-4">
-                    <a href="http://localhost:3900/api/auth/google" className="flex items-center justify-center w-12 h-12 rounded-full bg-white">
+                    <a href={`${backendUrl}/api/auth/google`} className="flex items-center justify-center w-12 h-12 rounded-full bg-white">
                         <FaGoogle className="text-red-600 w-6 h-6" />
                     </a>
-                    <a href="http://localhost:3900/api/auth/github" className="flex items-center justify-center w-12 h-12 rounded-full bg-white">
+                    <a href={`${backendUrl}/api/auth/github`} className="flex items-center justify-center w-12 h-12 rounded-full bg-white">
                         <FaGithub className="text-black w-6 h-6" />
                     </a>
                 </div>
