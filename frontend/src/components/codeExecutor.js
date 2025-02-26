@@ -24,9 +24,9 @@ export const executeCodeFromAPI=async(language,code)=>{
         
         const response = await fetch(url, options);
         const result = await response.json();
-
+        console.log(result?.run?.output)
         // Find language match
-       return result?.run?.output ? result?.run?.output : null
+       return result?.run?.output ? result?.run?.output : result?.run?.stderr
     } catch (error) {
         console.log(error)
     }

@@ -22,6 +22,7 @@ const CodeEditor =(
         const runProgramCode = async () => {
             setLoading(true)
          const output_ = await executeCodeFromAPI(selectedLanguage,content.toString())
+         console.log(output_)
            setOutput(output_)
            setLoading(false)
         };
@@ -103,8 +104,8 @@ const CodeEditor =(
                                 onChange={handleEditorChange}
                                 className="border border-gray-300 rounded-md "/>
                             
-                            <section className='w-[30%] h-[500px] bg-black px-4 py-2'>
-                                <p className='text-white text-lg'>
+                            <section className='w-[30%] h-[500px] bg-black px-4 py-2 overflow-scroll'>
+                                <p className='text-white text-lg '>
                                     <span className='text-white text-lg'>Output: </span>  
                                     {loading ? <span className="text-yellow-400"> executing...</span> : output}
                                 </p>

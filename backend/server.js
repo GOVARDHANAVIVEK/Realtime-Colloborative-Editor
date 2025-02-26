@@ -46,7 +46,7 @@ const limiter = rateLimit({
     legacyHeaders: false,
 });
 configurePassport();
-app.use(limiter);
+// app.use(limiter);
 
 // Routes
 app.use('/api/auth', authRoute);
