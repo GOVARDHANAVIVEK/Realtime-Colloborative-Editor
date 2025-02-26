@@ -14,7 +14,7 @@ const passport = require('passport')
 const session = require("express-session");
 const configurePassport =require('./config/passport')
 const io = socketIo(server, {
-    cors: { origin: ["http://localhost:5173","https://realtime-colloborative-editor.vercel.app"], credentials: true }
+    cors: { origin: ["http://localhost:5173","https://realtime-colloborative-editor.onrender.com"], credentials: true }
 });
 
 const PORT = process.env.PORT || 3900;
