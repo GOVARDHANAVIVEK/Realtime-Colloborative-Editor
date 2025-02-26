@@ -25,7 +25,7 @@ const LandingPage = () => {
         {/* Image Section */}
         <div className="lg:w-1/2">
           <img
-            src="./public/main-bg.png"
+            src="./frontend/public/main-bg.png"
             alt="Collaboration"
             className="w-full h-auto rounded-lg shadow-lg"
           />
@@ -68,7 +68,7 @@ const LandingPage = () => {
         </p>
         <div className="mt-6 w-max m-auto">
           <a
-            href = "http://localhost:3900/api/auth/google"
+            href = {`${backendUrl}/api/auth/google`}
             className="flex items-center bg-white text-black px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition"
           >
             <img
