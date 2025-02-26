@@ -4,7 +4,9 @@ import '../components/ui/signin.css'
 import { useNavigate } from "react-router-dom";
 import getToken from "./getToken";
 import {useNotification} from './NotificationProvider'
+const backendUrl = import.meta.env.VITE_APP_BACKEND_URL
 const SignIn = () => {
+    console.log("backend_url",backendUrl)
     const { showNotification } = useNotification();
     const [user,setUser] = useState({
         email:"",
@@ -34,7 +36,7 @@ const SignIn = () => {
             return
         }
         try {
-            const result = await fetch(`${process.env.VITE_APP_backend_url}/api/auth/signin`,{
+            const result = await fetch(`${backendUrl}/api/auth/signin`,{
                 method:"POST",
                 headers: {
                     "Content-Type": "application/json",

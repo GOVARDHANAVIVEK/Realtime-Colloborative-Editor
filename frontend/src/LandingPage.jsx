@@ -1,9 +1,10 @@
 import React ,{useEffect} from "react";
 import getToken from "./getToken";
+const backendUrl = import.meta.env.VITE_APP_BACKEND_URL
 const LandingPage = () => {
 
    getToken()
-    
+   console.log("backend_url",backendUrl)
   return (
     <div className="min-h-screen w-screen bg-black text-white flex flex-col items-center">
       {/* Navigation Bar */}

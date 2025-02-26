@@ -3,6 +3,7 @@ import { FaGoogle, FaGithub } from "react-icons/fa";
 import '../components/ui/signup.css'
 import { useNavigate } from "react-router-dom";
 import {useNotification} from './NotificationProvider'
+const backendUrl = import.meta.env.VITE_APP_BACKEND_URL
 const Signup = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 480);
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ const Signup = () => {
             return
         }
         try {
-            const result = await fetch(`${process.env.VITE_APP_backend_url}/api/auth/signup`,{
+            const result = await fetch(`${backendUrl}/api/auth/signup`,{
                 method:"POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -5,8 +5,10 @@ import Documents from "./Documents";
 import "../components/ui/documents.css";
 import socket from "./socket";
 import getUserIdFromToken from "./getUserId";
+const backendUrl = import.meta.env.VITE_APP_BACKEND_URL
 import {useNotification} from './NotificationProvider'
 const Home = () => {
+    console.log("backend_url",backendUrl)
   const userId = getUserIdFromToken()
   const [ownDocuments, setOwnDocuments] = useState([]);
   const [sharedDocuments, setSharedDocuments] = useState([]);
@@ -59,7 +61,7 @@ const Home = () => {
 
     const verifyToken = async () => {
       try {
-        const response = await fetch(`${process.env.VITE_APP_backend_url}/api/auth/verify-token`, {
+        const response = await fetch(`${backendUrl}/api/auth/verify-token`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -89,7 +91,7 @@ const Home = () => {
   const fetchDocuments = async () => {
     try {
       const token = localStorage.getItem("accessToken");
-      const result = await fetch(`${process.env.VITE_APP_backend_url}/api/documents`, {
+      const result = await fetch(`${backendUrl}/api/documents`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

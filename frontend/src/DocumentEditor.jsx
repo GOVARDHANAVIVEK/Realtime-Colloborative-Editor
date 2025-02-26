@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef ,useCallback} from 'react';
-
+const backendUrl = import.meta.env.VITE_APP_BACKEND_URL
 import socket from './socket';
 import { useParams, useNavigate } from 'react-router-dom';
 import getUserIdFromToken from './getUserId';
@@ -117,7 +117,7 @@ const DocumentEditor = () => {
     const fetchUsername = async (userId) => {
         if (userCache && userCache.current.has(userId)) return userCache.current.get(userId);
         try {
-            const response = await fetch(`${process.env.VITE_APP_backend_url}/api/users/user/${userId}`);
+            const response = await fetch(`${backendUrl}/api/users/user/${userId}`);
             const data = await response.json();
             if (data?.result?.username) {
                 userCache.current.set(userId, data.result.username);
@@ -133,7 +133,7 @@ const DocumentEditor = () => {
         if (!documentId) return;
         const loadData = async () => {
             try {
-                const response = await fetch(`${process.env.VITE_APP_backend_url}/api/documents/document/${documentId}`);
+                const response = await fetch(`${backendUrl}/api/documents/document/${documentId}`);
                 const data = await response.json();
                 console.log("content", content, "original", OriginalContent)
                 setContent(data?.result?.content || '');
@@ -266,7 +266,7 @@ const DocumentEditor = () => {
     useEffect(() => {
         const fetchVersions = async () => {
             try {
-                const response = await fetch(`${process.env.VITE_APP_backend_url}/api/documents/versions/${documentId}`);
+                const response = await fetch(`${backendUrl}/api/documents/versions/${documentId}`);
                 const data = await response.json();
                 console.log(data)
                 if (data?.result) {
@@ -306,7 +306,7 @@ const DocumentEditor = () => {
             setIsEditingTitle(false);
             try {
                 const token = localStorage.getItem("accessToken");
-                const response = await fetch(`${process.env.VITE_APP_backend_url}/api/documents/update-title/${documentId}`, {
+                const response = await fetch(`${backendUrl}/api/documents/update-title/${documentId}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                     body: JSON.stringify({ title: docTitle }),
@@ -328,7 +328,7 @@ const DocumentEditor = () => {
         const fetchTitle = async () => {
             try {
                 const token = localStorage.getItem("accessToken");
-                const response = await fetch(`${process.env.VITE_APP_backend_url}/api/documents/document/${documentId}`, {
+                const response = await fetch(`${backendUrl}/api/documents/document/${documentId}`, {
                     method: "GET",
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -363,7 +363,7 @@ const DocumentEditor = () => {
 
     const fetchContent = async () => {
         try {
-            const resposne = await fetch(`${process.env.VITE_APP_backend_url}/api/documents/versions/${documentId}/${selectedVersion}`);
+            const resposne = await fetch(`${backendUrl}/api/documents/versions/${documentId}/${selectedVersion}`);
             const data = await resposne.json()
             console.log("data", data, "version", selectedVersion)
             setContent(data?.result?.content)

@@ -1,5 +1,6 @@
 import React,{useState,useEffect} from "react";
 import socket from "./socket";
+const backendUrl = import.meta.env.VITE_APP_BACKEND_URL
 import {useNotification} from './NotificationProvider'
 const DocAccess = ({ docId, onClose,documentName }) => {
   const [emails, setEmails] = useState([]);
@@ -31,10 +32,10 @@ const DocAccess = ({ docId, onClose,documentName }) => {
   const shareDocumentAccess = async () => {
     try {
         let updatedUsers = [];
-        console.log(emails,`${process.env.VITE_APP_backend_url}/api/users/getUser/`)
+        console.log(emails,`${backendUrl}/api/users/getUser/`)
         for (const user of emails) {
             try {
-                const response = await fetch(`${process.env.VITE_APP_backend_url}/api/users/getUser/${user}`, {
+                const response = await fetch(`${backendUrl}/api/users/getUser/${user}`, {
                     method: "GET"
                 });
                 const data = await response.json();
