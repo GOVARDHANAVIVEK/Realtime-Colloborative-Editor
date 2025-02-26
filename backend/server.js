@@ -14,7 +14,7 @@ const passport = require('passport')
 const session = require("express-session");
 const configurePassport =require('./config/passport')
 const io = socketIo(server, {
-    cors: { origin: "http://localhost:5173", credentials: true }
+    cors: { origin: ["http://localhost:5173","http://localhost:8080"], credentials: true }
 });
 
 const PORT = process.env.PORT || 3900;
@@ -27,7 +27,7 @@ connectMongooseDB();
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: false }));
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173","http://localhost:8080"],
     credentials: true
 }));
 app.use(
@@ -230,6 +230,6 @@ io.on('connection', (socket) => {
 });
 
 // Start the server
-server.listen(PORT, () => {
+server.listen(PORT ||3900, () => {
     console.log(`Running on port ${PORT}`);
 });

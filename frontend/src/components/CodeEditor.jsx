@@ -18,13 +18,12 @@ const CodeEditor =(
 
         const [output, setOutput] = useState("");
         const [loading, setLoading] = useState(false);
-
         const runProgramCode = async () => {
             setLoading(true)
-         const output_ = await executeCodeFromAPI(selectedLanguage,content.toString())
-         console.log(output_)
-           setOutput(output_)
-           setLoading(false)
+            const output_ = await executeCodeFromAPI(selectedLanguage,content.toString())
+            console.log(output_)
+            setOutput(output_)
+            setLoading(false)
         };
   return (
     <div className='w-full'>

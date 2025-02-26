@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Nav from "./nav";
+import Navbar from '../src/components/Navbar'
 import Documents from "./Documents";
 import "../components/ui/documents.css";
 import socket from "./socket";
@@ -112,7 +112,7 @@ const Home = () => {
 
   return (
     <>
-      <Nav userId={userId}/>
+      <Navbar userId={userId}/>
       <Documents ownDocuments={ownDocuments} sharedDocuments={sharedDocuments} userId={userId}  />
       
     </>

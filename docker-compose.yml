@@ -1,2 +1,38 @@
+version: '3.8'
 
-ECHO is on.
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:80"  # Vite runs on port 5173 in dev mode
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "3900:3900"
+    environment:
+      - MONGOOSE_URI=mongodb+srv://govardhanavivek32:govardhanavivek32@microservices.pfp6w.mongodb.net/Real-Time-Collaborative-Code-Editor?retryWrites=true&w=majority&appName=MicroServices
+      - PORT=3900
+      - JWT_SECRET=82405dd1d90485c4afd1eb9358474a43b087a6acb1d3f94e61e71836dff823798c85180a6320586424fff0e57a481949b969bab750a888f4f3dd8dfe200010d9b0fd08a3deed279afbb846c3b3cce83d67ee301baed015ec52971626bee47b60993edb0b1095af5a52dbe1878b2d043806452878f950d7713dd45a5eb56434369b41d14d1257c78c0acdb8c8498d2d89b877687847e3e17745a8ebdae2ade2d51bbf925d6b3c10a4e2d80934042a233ab8fd82e0a39a7630d8f5994b58359bc7d7002a8f29ac0015752656a8acccb3f47e9d72fdcaefdaff3f4b8f0edf05d5bedd973aae9cdbbf11502366885dc9e8c5153c6966e6c4d7fcf930af10ac682214
+      - SESSION_SECRET=82405dd1d90485c4afd1eb9358474a43b087a6acb1d3f94e61e71836dff823798c85180a6320586424fff0e57a481949b969
+      - CLIENT_ID=1001349839573-0omk85u9dsctivelhhch0jkp2665317q.apps.googleusercontent.com
+      - CLIENT_SECRET=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
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+
+
+volumes:
+  mongo-data:

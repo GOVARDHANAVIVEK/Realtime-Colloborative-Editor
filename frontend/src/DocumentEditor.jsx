@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef ,useCallback} from 'react';
 import socket from './socket';
 import { useParams, useNavigate } from 'react-router-dom';
 import getUserIdFromToken from './getUserId';
-import Versions from './components/versions';
+import Versions from "../src/components/DocumentVersions"
 import ActiveUsers from './components/ActiveUsers';
 import TextEditor from './components/TextEditor';
 import CodeEditor from './components/CodeEditor';

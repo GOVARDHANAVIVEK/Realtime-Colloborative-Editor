@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext } from "react";
-import Notification from "./components/notification";// Import your notification component
+import Notifications from "../src/components/Notifications"
 
 // Create Context
 const NotificationContext = createContext();
@@ -23,7 +23,7 @@ export const NotificationProvider = ({ children }) => {
   return (
     <NotificationContext.Provider value={{ showNotification }}>
       {children}
-      {notification.visible && <Notification message={notification.message} type={notification.type} />}
+      {notification.visible && <Notifications message={notification.message} type={notification.type} />}
     </NotificationContext.Provider>
   );
 };
