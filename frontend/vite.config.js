@@ -7,6 +7,7 @@ export default defineConfig({
 
   ],
   server:{
-    allowedHosts: ['realtime-colloborative-editor.onrender.com']
+    allowedHosts: ['realtime-colloborative-editor.onrender.com'],
+    host:true
   },
 })
