@@ -34,7 +34,7 @@ const SignIn = () => {
             return
         }
         try {
-            const result = await fetch('http://localhost:3900/api/auth/signin',{
+            const result = await fetch(`${process.env.VITE_APP_backend_url}/api/auth/signin`,{
                 method:"POST",
                 headers: {
                     "Content-Type": "application/json",

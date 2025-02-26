@@ -31,10 +31,10 @@ const DocAccess = ({ docId, onClose,documentName }) => {
   const shareDocumentAccess = async () => {
     try {
         let updatedUsers = [];
-        console.log(emails,`http://localhost:3900/api/users/getUser/`)
+        console.log(emails,`${process.env.VITE_APP_backend_url}/api/users/getUser/`)
         for (const user of emails) {
             try {
-                const response = await fetch(`http://localhost:3900/api/users/getUser/${user}`, {
+                const response = await fetch(`${process.env.VITE_APP_backend_url}/api/users/getUser/${user}`, {
                     method: "GET"
                 });
                 const data = await response.json();

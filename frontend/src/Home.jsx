@@ -59,7 +59,7 @@ const Home = () => {
 
     const verifyToken = async () => {
       try {
-        const response = await fetch("http://localhost:3900/api/auth/verify-token", {
+        const response = await fetch(`${process.env.VITE_APP_backend_url}/api/auth/verify-token`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -89,7 +89,7 @@ const Home = () => {
   const fetchDocuments = async () => {
     try {
       const token = localStorage.getItem("accessToken");
-      const result = await fetch("http://localhost:3900/api/documents", {
+      const result = await fetch(`${process.env.VITE_APP_backend_url}/api/documents`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

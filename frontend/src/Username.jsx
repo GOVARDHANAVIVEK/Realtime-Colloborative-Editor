@@ -18,7 +18,7 @@ const Username = (userId) => {
                 }
 
                 console.log("Fetching from API...");
-                const response = await fetch(`http://localhost:3900/api/users/user/${userId}`, { method: "GET" });
+                const response = await fetch(`${process.env.VITE_APP_backend_url}/api/users/user/${userId}`, { method: "GET" });
                 const data = await response.json();
 
                 if (data?.result?.username) {

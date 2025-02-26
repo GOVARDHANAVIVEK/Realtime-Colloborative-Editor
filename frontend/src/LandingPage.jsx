@@ -24,7 +24,7 @@ const LandingPage = () => {
         {/* Image Section */}
         <div className="lg:w-1/2">
           <img
-            src="./src/assets/main-bg.png"
+            src="./public/main-bg.png"
             alt="Collaboration"
             className="w-full h-auto rounded-lg shadow-lg"
           />
@@ -72,7 +72,7 @@ const LandingPage = () => {
           >
             <img
               className="w-6 h-6 mr-3"
-              src="./src/assets/google.png"
+              src="./public/google.png"
               alt="Google Logo"
             />
             <span className="text-lg">Sign in with Google</span>

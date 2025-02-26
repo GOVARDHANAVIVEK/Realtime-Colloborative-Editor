@@ -45,7 +45,7 @@ const Navbar = ({userId}) => {
     const createDocument =async(newDoc)=>{
         try {
             const token = localStorage.getItem("accessToken");
-            const response = await fetch("http://localhost:3900/api/documents/createDocument", {
+            const response = await fetch(`${process.env.VITE_APP_backend_url}/api/documents/createDocument`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,

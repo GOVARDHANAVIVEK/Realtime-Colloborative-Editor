@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3900"); // Adjust your server URL
+const socket = io(process.env.VITE_APP_backend_url); // Adjust your server URL
 
 export default socket;
