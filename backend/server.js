@@ -14,7 +14,7 @@ const passport = require('passport')
 const session = require("express-session");
 const configurePassport =require('./config/passport')
 const io = socketIo(server, {
-    cors: { origin: ["http://localhost:5173","https://realtime-colloborative-editor.vercel.app"], credentials: true }
+    cors: { origin: process.env.FRONTEND_URL, credentials: true }
 });
 
 const PORT = process.env.PORT || 3900;
@@ -27,7 +27,7 @@ connectMongooseDB();
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: false }));
 app.use(cors({
-    origin: ["http://localhost:5173","https://realtime-colloborative-editor-1.onrender.com"],
+    origin: process.env.FRONTEND_URL,
     credentials: true
 }));
 app.use(

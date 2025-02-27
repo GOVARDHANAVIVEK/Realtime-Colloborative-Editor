@@ -58,7 +58,7 @@ const Home = () => {
       }, 1000);
       return;
     }
-
+    
     const verifyToken = async () => {
       try {
         const response = await fetch(`${backendUrl}/api/auth/verify-token`, {

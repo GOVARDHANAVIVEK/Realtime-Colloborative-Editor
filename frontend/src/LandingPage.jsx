@@ -2,7 +2,7 @@ import React ,{useEffect} from "react";
 import getToken from "./getToken";
 const backendUrl = import.meta.env.VITE_APP_BACKEND_URL
 const LandingPage = () => {
-
+    console.log("`${backendUrl}/api/auth/verify-token`",`${backendUrl}/api/auth/verify-token`)
    getToken()
    console.log("backend_url",backendUrl)
   return (
@@ -25,7 +25,7 @@ const LandingPage = () => {
         {/* Image Section */}
         <div className="lg:w-1/2">
           <img
-            src="./frontend/public/main-bg.png"
+            src="main-bg.png"
             alt="Collaboration"
             className="w-full h-auto rounded-lg shadow-lg"
           />
@@ -73,7 +73,7 @@ const LandingPage = () => {
           >
             <img
               className="w-6 h-6 mr-3"
-              src="./public/google.png"
+              src="google.png"
               alt="Google Logo"
             />
             <span className="text-lg">Sign in with Google</span>

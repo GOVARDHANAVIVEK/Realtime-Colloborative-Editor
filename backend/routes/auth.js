@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User  = require('../models/user')
 const passport = require('passport')
+require('dotenv').config()
 router.post('/signup', async (req, res) => {
     // console.log("signup...........");
     const { username, password, email,gender } = req.body;
@@ -208,7 +209,7 @@ router.get(
       console.log("generated token: ",token)
       // Send token as JSON response
     //   return res.status(200).send({ message: "Login successfully", token });
-    res.redirect(`http://localhost:5173?token=${token}`);
+    res.redirect(`${process.env.frontend_url}?token=${token}`);
     }
   );
 
