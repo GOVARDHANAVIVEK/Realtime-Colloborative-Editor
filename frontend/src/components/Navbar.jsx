@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useNotification } from '../NotificationProvider'
 import socket from "../socket";
 import { FaBell } from "react-icons/fa";
+const backendUrl = import.meta.env.VITE_APP_BACKEND_URL
 const Navbar = ({userId}) => {
     const { showNotification } = useNotification();
     useEffect(()=>{
@@ -45,7 +46,7 @@ const Navbar = ({userId}) => {
     const createDocument =async(newDoc)=>{
         try {
             const token = localStorage.getItem("accessToken");
-            const response = await fetch(`${process.env.VITE_APP_backend_url}/api/documents/createDocument`, {
+            const response = await fetch(`${backendUrl}/api/documents/createDocument`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,
