@@ -14,7 +14,11 @@ const passport = require('passport')
 const session = require("express-session");
 const configurePassport =require('./config/passport')
 const io = socketIo(server, {
+<<<<<<< HEAD
     cors: { origin: process.env.FRONTEND_URL, credentials: true }
+=======
+    cors: { origin: ["http://localhost:5173","https://realtime-colloborative-editor.onrender.com"], credentials: true }
+>>>>>>> 3d5814818209d1aaf26d0bbc21400aa2afd173f7
 });
 
 const PORT = process.env.PORT || 3900;
@@ -28,6 +32,7 @@ app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: false }));
 app.use(cors({
     origin: process.env.FRONTEND_URL,
+
     credentials: true
 }));
 app.use(
