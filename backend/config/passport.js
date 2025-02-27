@@ -24,7 +24,7 @@ const configurePassport = async() =>{
     passport.use(new GoogleOauth({
         clientID:process.env.Client_ID,
         clientSecret:process.env.Client_Secret,
-        callbackURL:"http://localhost:3900/api/auth/google/callback",
+        callbackURL:`${process.env.BACKEND_CALLBACK_URL}/api/auth/google/callbac`,
         scope: ["profile", "email"]
         },
         async function(accessToken, refreshToken, profile, cb) {
