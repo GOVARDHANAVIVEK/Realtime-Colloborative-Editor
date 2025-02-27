@@ -172,7 +172,7 @@ const DocumentEditor = () => {
 
         socket.on('load-document', (data) => setContent(data));
 
-        socket.on('receive-changes', (newContent) => setContent(newContent));
+        socket.on('receive-changes', (newContent) => setContent((prevContent) => newContent));
 
         return () => {
             socket.off('load-document');
