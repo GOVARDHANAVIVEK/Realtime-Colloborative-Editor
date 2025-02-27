@@ -209,7 +209,7 @@ router.get(
       console.log("generated token: ",token)
       // Send token as JSON response
     //   return res.status(200).send({ message: "Login successfully", token });
-    res.redirect(`${process.env.frontend_url}?token=${token}`);
+    res.redirect(`${process.env.FRONTEND_URL}?token=${token}`);
     }
   );
 

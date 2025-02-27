@@ -21,6 +21,7 @@ const configurePassport = async() =>{
             done(error)
         }
     })
+    console.log("${process.env.BACKEND_CALLBACK_URL}/api/auth/google/callback",`${process.env.BACKEND_CALLBACK_URL}/api/auth/google/callback`)
     passport.use(new GoogleOauth({
         clientID:process.env.Client_ID,
         clientSecret:process.env.Client_Secret,
