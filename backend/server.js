@@ -43,7 +43,7 @@ const limiter = rateLimit({
     legacyHeaders: false,
 });
 
-// configurePassport(); // Make sure passport is correctly configured
+configurePassport(); // Make sure passport is correctly configured
 // app.use(limiter);
 
 // Routes
