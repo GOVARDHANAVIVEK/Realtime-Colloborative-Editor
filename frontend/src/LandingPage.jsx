@@ -35,7 +35,7 @@ const LandingPage = () => {
         </div>
 
         {/* Text Section */}
-        <div className="lg:w-1/2 mt-8 lg:mt-0">
+        <div className="lg:w-1/2 mt-8 lg:mt-0 ">
           <h2 className="text-4xl text-orange-400 font-bold leading-tight">
             Craft. Collaborate. Compile.
           </h2>
@@ -50,11 +50,11 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="w-full px-6 py-12 bg-gray-800 text-center">
-      <h2 className="text-3xl text-white font-bold">Why Choose CodeCraftr?</h2>
-        <div className="text-start m-auto  w-max">
+      <section className="w-full px-6 py-12 bg-gray-800 text-center ">
+      <h2 className="lg:text-3xl md:text-3xl text-2xl text-white font-bold mb-10">Why Choose CodeCraftr?</h2>
+        <div className="text-start m-auto lg:w-max md:w-max sm:w-1/2  ">
         
-        <ul className="mt-6 space-y-4 text-lg text-gray-300">
+        <ul className="mt-1 space-y-4 text-lg text-gray-300">
           <li>🚀 <strong>Real-time Collaboration:</strong> Code and edit seamlessly with your team.</li>
           <li>🔒 <strong>Secure & Scalable:</strong> End-to-end encryption ensures data protection.</li>
           <li>📝 <strong>Built-in Code Execution:</strong> Write, run, and debug code instantly.</li>
