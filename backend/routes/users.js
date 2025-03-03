@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 const User  = require('../models/user')
-
+const NotificationModel = require('../models/notifications')
 
 router.get("/getUser/:email",async(req,res)=>{
     const {email} = req.params;
@@ -78,5 +78,43 @@ router.get('/',async(req,res)=>{
         
     }
 })
+
+router.get('/notifications/:userId', async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const notifications = await NotificationModel.find({ userId });
+
+        // If no notifications exist
+        if (notifications.length === 0) {
+            return res.json({
+                ok: false,
+                status: 404,
+                message: "No new notifications"
+            });
+        }
+
+        console.log(JSON.stringify(notifications, null, 2));
+
+        // Extract messages from all notifications
+        const newNotifications = notifications.flatMap(n => n.messages); // Extract messages
+
+        console.log(JSON.stringify(newNotifications, null, 2));
+
+        return res.json({
+            ok: true,
+            status: 200,
+            result: newNotifications || [] // Ensure result is an array
+        });
+
+    } catch (error) {
+        console.error("Error fetching notifications:", error);
+        return res.status(500).json({
+            ok: false,
+            status: 500,
+            message: "Internal server error"
+        });
+    }
+});
+
 
 module.exports = router;

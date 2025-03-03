@@ -4,7 +4,7 @@ import '../components/ui/signup.css'
 import { useNavigate } from "react-router-dom";
 import {useNotification} from './NotificationProvider'
 const backendUrl = import.meta.env.VITE_APP_BACKEND_URL
-const Signup = () => {
+const Signup = ({setIsAuthenticated}) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 480);
   const navigate = useNavigate();
   const { showNotification } = useNotification();
@@ -71,6 +71,7 @@ const Signup = () => {
                 
                 if (data?.result) {
                     localStorage.setItem("accessToken", data?.result);
+                    setIsAuthenticated(true)
                 }
                 showNotification(data.Message, "success")
                 navigate("/home");

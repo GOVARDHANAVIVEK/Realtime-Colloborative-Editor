@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import {Route, Routes } from "react-router-dom";
+import { useEffect, useState } from 'react'
+import {Route, Routes,useNavigate  } from "react-router-dom";
 
 import LandingPage from './LandingPage'
 import Home from './Home';
@@ -8,21 +8,35 @@ import SignUp from './SignUp';
 import DocumentEditor from './DocumentEditor';
 
 import './index.css'
-
+import { SocketProvider } from './SocketProvider';
 import {NotificationProvider} from './NotificationProvider'
 function App() {
- 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(()=>{
+    const token = localStorage.getItem('accessToken');
+    setIsAuthenticated(!!token)
+  });
+
+  
+
   return (
     <NotificationProvider>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/document/editor/:documentId" element={<DocumentEditor />} />
-        
-        
-      </Routes>
+      {isAuthenticated ?(
+        <SocketProvider isAuthenticated={isAuthenticated}>
+          <Routes>
+            <Route path="/home" element={<Home setIsAuthenticated={setIsAuthenticated}/>} />
+            <Route path="/document/editor/:documentId" element={<DocumentEditor />} />
+          </Routes>
+        </SocketProvider>
+        ):(
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/signup" element={<SignUp setIsAuthenticated={setIsAuthenticated} />} />
+            <Route path="/signin" element={<SignIn setIsAuthenticated={setIsAuthenticated}/>} />
+          </Routes>
+      )}
       </NotificationProvider>
   )
 }

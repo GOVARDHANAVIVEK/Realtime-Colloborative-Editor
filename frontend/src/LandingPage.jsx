@@ -1,17 +1,20 @@
 import React ,{useEffect} from "react";
-import getToken from "./getToken";
+import getToken  from "./APIContext";
 const backendUrl = import.meta.env.VITE_APP_BACKEND_URL
 const LandingPage = () => {
     console.log("`${backendUrl}/api/auth/verify-token`",`${backendUrl}/api/auth/verify-token`)
    getToken()
    console.log("backend_url",backendUrl)
   return (
-    <div className="min-h-screen w-screen bg-black text-white flex flex-col items-center">
+    <div className="min-h-screen w-full bg-black text-white flex flex-col items-center">
       {/* Navigation Bar */}
-      <nav className="w-full flex justify-between items-center p-6 bg-gray-900 shadow-md">
-        <h1 className="text-2xl font-bold text-white">DocsApp</h1>
+      <nav className="w-full flex  justify-between items-center px-4 py-2 bg-gray-900 shadow-md text-center">
+        <h1 className="text-lg  font-bold text-white text-center w-20 justify-center mt-4">CodeCraftr</h1>
+        
+        
+
         <div className="flex space-x-6">
-          <a href="/signin" className="text-blue-400 text-lg hover:underline">
+          <a href="/signin" className="text-blue-400 text-lg hover:underline ">
             Sign In
           </a>
           <a href="/signup" className="text-blue-400 text-lg hover:underline">
@@ -34,37 +37,40 @@ const LandingPage = () => {
         {/* Text Section */}
         <div className="lg:w-1/2 mt-8 lg:mt-0">
           <h2 className="text-4xl text-orange-400 font-bold leading-tight">
-            Collaborate & Manage Documents Effortlessly!
+            Craft. Collaborate. Compile.
           </h2>
           <p className="mt-6 text-lg text-gray-300">
-            Work smarter, not harder! Our collaborative tool lets you create,
-            edit, and manage documents seamlessly with your team in real-time.
+          Work smarter, not harder! CodeCraftr is your ultimate real-time collaborative coding and document editor.
+          Write, edit, and execute code seamlessly with your team—no version conflicts, just smooth workflow.
           </p>
           <p className="mt-4 text-lg text-gray-300">
-            Say goodbye to version conflicts and hello to smooth workflow!
+          Say goodbye to messy merges and hello to synchronized innovation! 🚀
           </p>
         </div>
       </section>
 
       {/* Features Section */}
       <section className="w-full px-6 py-12 bg-gray-800 text-center">
-        <h2 className="text-3xl text-white font-bold">Why Choose DocsApp?</h2>
-        <p className="mt-4 text-lg text-gray-300">
-          - Real-time collaboration with your team.
-        </p>
-        <p className="mt-2 text-lg text-gray-300">
-          - Secure and accessible document storage.
-        </p>
-        <p className="mt-2 text-lg text-gray-300">
-          - Version control to track document changes.
-        </p>
+      <h2 className="text-3xl text-white font-bold">Why Choose CodeCraftr?</h2>
+        <div className="text-start m-auto  w-max">
+        
+        <ul className="mt-6 space-y-4 text-lg text-gray-300">
+          <li>🚀 <strong>Real-time Collaboration:</strong> Code and edit seamlessly with your team.</li>
+          <li>🔒 <strong>Secure & Scalable:</strong> End-to-end encryption ensures data protection.</li>
+          <li>📝 <strong>Built-in Code Execution:</strong> Write, run, and debug code instantly.</li>
+          <li>📂 <strong>Version Control:</strong> Track and manage changes effortlessly.</li>
+          <li>⚡ <strong>Intuitive UI:</strong> A clean and developer-friendly interface.</li>
+        </ul>
+        </div>
+        
       </section>
+
 
       {/* Call to Action */}
       <section className="w-full px-6 py-12 text-center">
-        <h2 className="text-3xl text-orange-400 font-bold">Get Started with DocsApp</h2>
+        <h2 className="text-3xl text-orange-400 font-bold">Get Started with CodeCraftr</h2>
         <p className="mt-4 text-lg text-gray-300">
-          Join thousands of professionals who streamline their workflow with DocsApp.
+          Join thousands of professionals who streamline their workflow with CodeCraftr.
         </p>
         <div className="mt-6 w-max m-auto">
           <a

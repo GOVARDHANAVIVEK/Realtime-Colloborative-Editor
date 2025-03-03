@@ -1,20 +1,23 @@
-import React, { useEffect, useState, useRef ,useCallback} from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 const backendUrl = import.meta.env.VITE_APP_BACKEND_URL
-import socket from './socket';
+// import socket from './socket';
+import { useSocket } from './SocketProvider';
 import { useParams, useNavigate } from 'react-router-dom';
-import getUserIdFromToken from './getUserId';
-import Versions from "../src/components/DocumentVersions"
+import { getUserIdFromToken } from './APIContext';
+import DocumentVersions from "../src/components/DocumentVersions"
 import ActiveUsers from './components/ActiveUsers';
 import TextEditor from './components/TextEditor';
 import CodeEditor from './components/CodeEditor';
 import { useNotification } from './NotificationProvider'
-
+import { detectLanguage } from './helperFunctions';
+import { fetchUsername, loadData, fetchVersions, saveDocumentTitle, fetchTitle, fetchContent } from './APIContext';
 // import TrackCursor from './components/TrackCursor';
 const DocumentEditor = () => {
 
+    const socket  = useSocket()
     const userId = getUserIdFromToken()
     console.log("userid", userId)
-  
+
     // const {mountEditor} = TrackCursor()
     const { documentId } = useParams();
     console.log('Document ID:', documentId);
@@ -32,14 +35,13 @@ const DocumentEditor = () => {
     const [enableRestore, setEnableRestore] = useState(false)
     const [versionedDocuments, setVersionedDocuments] = useState([])
     const [selectedVersion, setSelectedVersion] = useState(null);
-    const [restoreContent, setRestoreContent] = useState("")
     const [selectedVersionIndex, setSelectedVersionIndex] = useState(null)
     const [showBackBtn, setShowBackBtn] = useState(null)
     const [showUsers, setShowUsers] = useState(false);
     const [showVersions, setShowVersions] = useState(false);
     const { showNotification } = useNotification();
     const [runCode, setRunCode] = useState(false)
-  
+
 
     const [checkedDocs, setCheckedDocs] = useState(() => {
         const savedState = localStorage.getItem("checkedDocs");
@@ -69,82 +71,23 @@ const DocumentEditor = () => {
     }, [navigate]);
 
 
-
-    // Function to detect language based on content
-    const detectLanguage = (text) => {
-        if (!text || typeof text !== "string") return "plaintext"; // Handle empty input
-
-        // JSON: Must start with `{}` or `[]` and follow JSON-like structure
-        if (/^\s*\{[\s\n]*("|')?\w+\1?:/.test(text) || /^\s*\[.*\]\s*$/.test(text)) return "json";
-
-        // Python: Functions, imports, class definitions, or Pythonic syntax
-        if (
-            /^\s*def\s+\w+\(/.test(text) ||               // Function definition
-            /^\s*import\s+\w+/.test(text) ||              // Import statement
-            /^\s*class\s+\w+\s*\(/.test(text) ||          // Class definition
-            /^\s*print\(["']/.test(text) ||               // print() function
-            /\bself\b/.test(text) ||                      // `self` keyword (OOP)
-            /\b(lambda|yield|async|await|try|except)\b/.test(text)  // Python keywords
-        ) return "python";
-
-        // JavaScript: ES6 imports, variable declarations, function definitions
-        if (
-            /^\s*import .* from ['"].*['"];?/.test(text) ||  // ES6 import
-            /^\s*(const|let|var) .*=\s*.*=>/m.test(text) ||  // Arrow function
-            /\bfunction\s+\w+\(/.test(text) ||              // Function declaration
-            /\b(console\.log|document\.querySelector)\b/.test(text) || // Common JS functions
-            /\bclass\s+\w+\s*\{/.test(text)                // Class definition
-        ) return "javascript";
-
-        // HTML: Detects <html>, <head>, <body>, and common HTML tags
-        if (/<\/?(html|head|body|div|span|p|a|img|h[1-6]|script|style|meta|title)\b[^>]*>/i.test(text)) return "html";
-
-        // CSS: Looks for CSS rules with selectors and properties
-        if (/\b[a-zA-Z0-9\-_]+\s*\{\s*[^{}]+\s*\}/.test(text) || /\b(color|background|font|border|padding|margin):\s*[^;]+;/.test(text)) return "css";
-
-        // SQL: Detects common SQL keywords and syntax
-        if (/\b(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|JOIN|ORDER BY|GROUP BY|HAVING|LIMIT)\b/i.test(text)) return "sql";
-
-        // Shell Script (Bash): Detects `#!/bin/bash` or common shell commands
-        if (/^#!\s*\/bin\/bash/.test(text) || /\b(echo|cd|ls|pwd|grep|awk|sed|chmod|sudo)\b/.test(text)) return "shell";
-
-        // Default: Plain Text (fallback)
-        return "plaintext";
-    };
-
-
-
-    const fetchUsername = async (userId) => {
-        if (userCache && userCache.current.has(userId)) return userCache.current.get(userId);
-        try {
-            const response = await fetch(`${backendUrl}/api/users/user/${userId}`);
-            const data = await response.json();
-            if (data?.result?.username) {
-                userCache.current.set(userId, data.result.username);
-                return data.result.username;
-            }
-        } catch (error) {
-            console.error('Error fetching username:', error);
-        }
-        return userId;
-    };
-
     useEffect(() => {
         if (!documentId) return;
-        const loadData = async () => {
-            try {
-                const response = await fetch(`${backendUrl}/api/documents/document/${documentId}`);
-                const data = await response.json();
-                console.log("content", content, "original", OriginalContent)
-                setContent(data?.result?.content || '');
-                setDocTitle(data?.result?.title || '');
-                setOriginalContent(data?.result?.content)
 
+        async function getData() {
+            try {
+                const data = await loadData(backendUrl, documentId);  // Call the function
+                console.log("data of document", data)
+                setContent(data?.content || '');
+                setDocTitle(data?.title || '');
+                setOriginalContent(data?.content)
             } catch (error) {
-                console.error('Error fetching document data:', error);
+                console.log("error getting data of document", error)
             }
-        };
-        loadData();
+        }
+
+        getData();
+
     }, [documentId]); // ✅ Runs only when documentId changes
 
     useEffect(() => {
@@ -160,9 +103,9 @@ const DocumentEditor = () => {
             console.log("Received users:", users);
 
             const userArray = Array.isArray(users) ? users : Object.values(users); // Ensure it's an array
-
+            console.log("userArray", userArray)
             try {
-                const userNames = await Promise.all(userArray.map(fetchUsername));
+                const userNames = await Promise.all(userArray.map(userId => fetchUsername(backendUrl, userId, userCache)));
                 setActiveUsers(userNames);
             } catch (error) {
                 console.error("Error fetching usernames:", error);
@@ -180,64 +123,70 @@ const DocumentEditor = () => {
             socket.emit("leaveDocument", { documentId, userId });
             socket.off("activeUsers");
         };
-    }, [documentId, userId]);
+    }, [socket,documentId, userId]);
     // Detect language whenever content updates
     useEffect(() => {
         setSelectedLanguage(detectLanguage(content));
     }, [content]);
 
-    
-    
-    const handleTyping = async ({ userId}) => {
-        console.log("Received user typing event:", { userId});
-        setTypingUser(await fetchUsername(userId));
-    
-        
-        
+
+
+    const handleTyping = async ({ userId }) => {
+        console.log("Received user typing event:", userId);
+
+        try {
+            const username = await fetchUsername(backendUrl, userId, userCache);
+            setTypingUser(username);
+        } catch (error) {
+            console.error("Error fetching username:", error);
+        }
+
     };
-    
-    
-    
+
+
+
     useEffect(() => {
         if (!documentId || !socket) return;
-    
+
         socket.on('user-typing', handleTyping);
-       
-        socket.on('user-stopped-typing',(()=>{
+
+        socket.on('user-stopped-typing', (() => {
             setTypingUser('')
         }));
-        
-        
-        
+
+
+
         return () => {
             socket.off('user-typing', handleTyping);
             socket.off('user-stopped-typing');
         };
-    }, [documentId,socket]); // Include handleTyping in dependencies
-    
+    }, [socket,documentId, socket]); // Include handleTyping in dependencies
 
-  
-    
 
-   
-   
+
+
+
+
+
+
     // Ensure editorRef stays intact across re-renders
-   
-    
+
+
     const handleEditorChange = (value) => {
         setContent(value);
+
         socket.emit('send-changes', { documentId, content: value });
-    
-        socket.emit('user-typing', { documentId, userId});
-    
+
+        socket.emit('user-typing', { documentId, userId });
+
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    
+
         typingTimeoutRef.current = setTimeout(() => {
             socket.emit('user-stopped-typing', { documentId });
-                      
+
         }, 500);
     };
-    
+
 
 
     const saveDocument = () => {
@@ -249,7 +198,9 @@ const DocumentEditor = () => {
             showNotification(`Saving.........`, "success")
             setTimeout(() => {
                 showNotification(`Saved.`, "success")
-            }, 1500)
+            }, 1500);
+
+            socket.emit('send-group-notification',{documentId,userId});
         } else {
             showNotification('Set a document name to enable saving.', "failure")
         }
@@ -264,32 +215,18 @@ const DocumentEditor = () => {
     }, [lastSaved, checkedDocs[documentId]]);
 
     useEffect(() => {
-        const fetchVersions = async () => {
-            try {
-                const response = await fetch(`${backendUrl}/api/documents/versions/${documentId}`);
-                const data = await response.json();
-                console.log(data)
-                if (data?.result) {
-                    const updatedDocs = await Promise.all(
-                        data?.result.map(async (doc) => ({
-                            ...doc,
-                            savedBy: await fetchUsername(doc.savedBy),
-                        }))
-                    );
-                    setVersionedDocuments(updatedDocs);
-                }
-            } catch (error) {
-                console.error("Error fetching document versions:", error);
-            }
-        };
-
-        fetchVersions();
-        socket.on("version-saved", fetchVersions);
+        const fetchDocumentversions = async () => {
+            const updatedDocs = await fetchVersions(backendUrl, documentId, userCache);
+            console.log("updatedDocs", updatedDocs)
+            setVersionedDocuments(updatedDocs);
+        }
+        fetchDocumentversions()
+        socket.on("version-saved", fetchDocumentversions);
 
         return () => {
-            socket.off("version-saved", fetchVersions);
+            socket.off("version-saved", fetchDocumentversions);
         };
-    }, [documentId]); // ✅ Empty dependency array to avoid reattaching event listener
+    }, [socket,documentId]); // ✅ Empty dependency array to avoid reattaching event listener
 
     useEffect(() => {
         console.log("Updated versionedDocuments:", versionedDocuments);
@@ -304,46 +241,22 @@ const DocumentEditor = () => {
         if (e.key === "Enter") {
             e.preventDefault();
             setIsEditingTitle(false);
-            try {
-                const token = localStorage.getItem("accessToken");
-                const response = await fetch(`${backendUrl}/api/documents/update-title/${documentId}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                    body: JSON.stringify({ title: docTitle }),
-                });
-                if (!response.ok) throw new Error("Failed to update title");
-
-                const data = await response.json();
-                // if (data?.result?.title) {
-                //     setDocTitle(data.result.title); // Ensure state updates with new title
-                // }
-                showNotification(`title Saved.`, "success")
-            } catch (error) {
-                console.error("Error updating title:", error);
-            }
+            console.log("docTitle", docTitle)
+            const documentTitle = await saveDocumentTitle(docTitle, documentId, backendUrl)
+            console.log("documentTitle",documentTitle)
+            // setDocTitle(documentTitle || "");
+            showNotification(`Changes Saved`, "success")
         }
     };
 
     useEffect(() => {
-        const fetchTitle = async () => {
-            try {
-                const token = localStorage.getItem("accessToken");
-                const response = await fetch(`${backendUrl}/api/documents/document/${documentId}`, {
-                    method: "GET",
-                    headers: { Authorization: `Bearer ${token}` },
-                });
 
-                if (!response.ok) throw new Error("Failed to fetch title");
-
-                const data = await response.json();
-                setDocTitle(data?.result?.title || "");
-
-            } catch (error) {
-                console.error("Error fetching title:", error);
-            }
-        };
-
-        fetchTitle();
+        const fetchDocumentsTitle = async()=>{
+            const updatedDocumentTitle =await fetchTitle(backendUrl, documentId);
+            console.log("fetchDocumentsTitle",updatedDocumentTitle)
+            setDocTitle(updatedDocumentTitle || "");
+        }
+        fetchDocumentsTitle()
     }, [documentId]);
 
 
@@ -361,24 +274,19 @@ const DocumentEditor = () => {
         setShowBackBtn(false)
     }
 
-    const fetchContent = async () => {
-        try {
-            const resposne = await fetch(`${backendUrl}/api/documents/versions/${documentId}/${selectedVersion}`);
-            const data = await resposne.json()
-            console.log("data", data, "version", selectedVersion)
-            setContent(data?.result?.content)
-            return data
-        } catch (error) {
-            console.log(error)
-        }
-    }
+
     useEffect(() => {
         console.log("selectedVersion", selectedVersion)
 
         if (selectedVersion !== null && selectedVersion !== undefined) {
             setContent('')
-            fetchContent()
-
+            const fetchDocumentversionData = async () => {
+                const fetched_Data = await fetchContent(backendUrl, documentId, selectedVersion)
+                console.log("conetnt fetch versions", fetched_Data)
+                setContent(fetched_Data?.result?.content)
+                console.log("conetnt fetch versions", fetched_Data?.result?.content)
+            }
+            fetchDocumentversionData()
         } else {
             console.log("came here.....")
             setContent(OriginalContent)
@@ -393,13 +301,21 @@ const DocumentEditor = () => {
     }
     const restoreSelectedVersionContent = () => {
         if (selectedVersion !== null && selectedVersion !== undefined) {
-            const data = fetchContent()
-            console.log(data)
-            setContent(data?.result?.content)
-            // setOriginalContent(data?.result?.content)
-            socket.emit('save-document', { documentId, content })
-            socket.emit('remove-version', { documentId, selectedVersion })
-            console.log("content", content, "original", OriginalContent)
+            const fetchDocumentversionData = async () => {
+                const fetched_Data = await fetchContent(backendUrl, documentId, selectedVersion)
+                console.log("conetnt fetch versions", fetched_Data)
+
+                setContent(fetched_Data?.result?.content)
+                // setOriginalContent(data?.result?.content)
+                socket.emit('save-document', { documentId, content })
+                socket.emit('remove-version', { documentId, selectedVersion })
+                console.log("content", content, "original", OriginalContent)
+                setEnableRestore(false)
+                displayVersions()
+            }
+            fetchDocumentversionData()
+
+
         } else {
             // setContent(OriginalContent)
             setContent('')
@@ -424,15 +340,15 @@ const DocumentEditor = () => {
         setRunCode(false)
     }
 
-    
+
 
     return (
 
-        <div className="flex flex-col md:flex-col sm:flex-col w-full h-screen  bg-gray-50 w-[100%] ">
+        <div className="flex flex-col md:flex-col sm:flex-col w-full h-screen  bg-gray-50">
 
             {/*Users n version history*/}
-            <div className='flex flex-row md:flex-row sm:flex-col w-full h-max py-4 px-2 justify-between items-center '>
-                <div className="w-max bg-gray-900 text-black rounded-lg  text-center items-center">
+            <div className='flex flex-col md:flex-row sm:flex-row w-full h-max py-4 px-2 justify-between items-center gap-4'>
+                <div className="w-max bg-gray-900 text-black rounded-lg  text-center items-center ">
                     <input
                         type="text"
                         value={docTitle}
@@ -461,7 +377,8 @@ const DocumentEditor = () => {
                         </button>
 
                         {showUsers && (
-                            <div className="absolute top-full right-0 mt-2 w-[300px] flex items-center justify-end bg-transparent bg-opacity-50 z-50">
+                            <div className="absolute top-full sm:right-20 md:right-20 lg:right-0 mt-2 w-[300px] flex items-center justify-end bg-transparent bg-opacity-50 z-50
+                                            ">
                                 <div className="relative w-full h-[60vh] bg-gray-800 p-6 shadow-2xl rounded-xl">
 
 
@@ -497,7 +414,7 @@ const DocumentEditor = () => {
 
                                     {/* Active Users List */}
                                     <div className="overflow-y-auto h-[90%] px-4">
-                                        <Versions
+                                        <DocumentVersions
                                             versionedDocuments={versionedDocuments}
                                             getVersionIndex={getVersionIndex}
                                             selectedVersionIndex={selectedVersionIndex}
@@ -530,7 +447,7 @@ const DocumentEditor = () => {
             <div className="flex flex-col w-[100%] md:w-full sm:w-2/3 items-center p-6 ">
                 {/*Editor Panel Code */}
                 {/* {styles} */}
-                {(selectedLanguage === "plaintext" || selectedLanguage === "json" ) ? (
+                {(selectedLanguage === "plaintext" || selectedLanguage === "json") ? (
 
 
                     <TextEditor
@@ -539,8 +456,10 @@ const DocumentEditor = () => {
                         enableRestore={enableRestore}
                         saveDocument={saveDocument}
                         content={content}
+
                         handleEditorChange={handleEditorChange}
-                        
+
+
 
                     />
                 ) :
@@ -554,7 +473,7 @@ const DocumentEditor = () => {
                         executeCode={executeCode}
                         closeExecuter={closeExecuter}
                         handleEditorChange={handleEditorChange}
-                       
+
                     />
 
                 }

@@ -9,17 +9,22 @@ const DocumentVersions = ({ versionedDocuments,
   showBackBtn,
   removeVersionIndex
 }) => {
+  let sortedVersions =[]
+  let current = null;
+  let latest = null
+  if(versionedDocuments && versionedDocuments.length>0){
+    sortedVersions = [...versionedDocuments].sort((a, b) => new Date(b.lastSaved) - new Date(a.lastSaved));
+    current = Math.max(...sortedVersions.map(version => version.__v));
+    latest = Math.max(...sortedVersions.map(version => version.__v - 1));
+  }
 
 
-const sortedVersions = [...versionedDocuments].sort((a, b) => new Date(b.lastSaved) - new Date(a.lastSaved));
 
-const current = Math.max(...sortedVersions.map(version => version.__v));
-const latest = Math.max(...sortedVersions.map(version => version.__v - 1));
 // console.log("versionedDocuments.length",sortedVersions.length)
 return (
   <div className="flex-1 bg-white shadow-lg rounded-lg p-6 border-4 border-gray-300 overflow-auto h-[100%]">
           <div className="box-border w-full h-auto px-4 py-4 overflow-auto">
-          {sortedVersions.length > 1 ? (
+          {sortedVersions.length > 1 && current!=null ? (
 
               sortedVersions.filter(version => version.__v !== current).map((version) => (
 

@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 import '../components/ui/signin.css'
 import { useNavigate } from "react-router-dom";
-import getToken from "./getToken";
+
 import {useNotification} from './NotificationProvider'
 const backendUrl = import.meta.env.VITE_APP_BACKEND_URL
-const SignIn = () => {
+const SignIn = ({setIsAuthenticated}) => {
     console.log("backend_url",backendUrl)
     const { showNotification } = useNotification();
     const [user,setUser] = useState({
@@ -54,7 +54,9 @@ const SignIn = () => {
             } else {
                 if (data?.result) {
                     localStorage.setItem("accessToken", data?.result);
+                    setIsAuthenticated(true);
                 }
+
                 showNotification(data.Message, "success")
                 navigate("/home");
             }
@@ -67,10 +69,7 @@ const SignIn = () => {
     
     }
 
-    const handleGoogleLogin = () => {
-        getToken()
-    };
-    
+
     
 
     
